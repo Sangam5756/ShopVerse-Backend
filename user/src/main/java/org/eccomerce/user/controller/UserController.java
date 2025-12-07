@@ -15,6 +15,7 @@ public class UserController {
     private final UserService userService;
 
 
+
    @GetMapping("/profile")
     public ResponseEntity<?> getUserById() {
        return ResponseEntity.ok(userService.getUser());

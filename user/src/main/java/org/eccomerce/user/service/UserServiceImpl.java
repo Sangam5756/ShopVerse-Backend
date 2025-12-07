@@ -1,41 +1,60 @@
 package org.eccomerce.user.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.eccomerce.user.dto.RegisterRequestDTO;
+import org.eccomerce.user.dto.UserResponseDTO;
+import org.eccomerce.user.mapper.UserMapper;
 import org.eccomerce.user.model.User;
 import org.eccomerce.user.repository.UserRepository;
-import org.eccomerce.user.service.UserService;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
+    private final PasswordEncoder  passwordEncoder;
+
+
+
+
 
     @Override
-    public User registerUser(User user) {
+    public UserResponseDTO getUser() {
+        String email = (String) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
 
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Email already registered");
-        }
-
-        return userRepository.save(user);
-    }
-
-    @Override
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
+        System.out.println(email);
+        User existUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+       existUser.getAddresses().size();
+       return UserMapper.mapToDto(existUser);
+
     }
 
     @Override
     public User updateUser(Long id, User updated) {
-        User existing = getUserById(id);
+        User existing = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         existing.setFullName(updated.getFullName());
-        existing.setEmail(updated.getEmail());
+
+//        change the email if only its need
+        if (!existing.getEmail().equals(updated.getEmail())) {
+            if (userRepository.existsByEmail(updated.getEmail()))
+                throw new RuntimeException("Email already in use");
+
+            existing.setEmail(updated.getEmail());
+        }
+
         existing.setPhoneNo(updated.getPhoneNo());
-        existing.setPassword(updated.getPassword());
         existing.setRole(updated.getRole());
 
         return userRepository.save(existing);
@@ -43,7 +62,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long id) {
-        User existing = getUserById(id);
+        User existing =userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
         userRepository.delete(existing);
     }
 }

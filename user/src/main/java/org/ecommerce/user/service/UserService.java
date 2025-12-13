@@ -6,7 +6,7 @@ import org.ecommerce.user.model.User;
 public interface UserService {
 
 
-    UserResponseDTO getUser();
+    UserResponseDTO getUserByEmail(String email);
 
     User updateUser(Long id, User updated);
 

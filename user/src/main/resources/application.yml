@@ -1,0 +1,7 @@
+# Local configuration overrides (if needed)
+# This file is intentionally kept minimal as most configuration comes from the config server
+
+# JWT configuration (sensitive, can be moved to config server's secure properties)
+jwt:
+  secret: my_super_long_secret_key_that_is_at_least_32_chars!
+  expiration-ms: 3600000

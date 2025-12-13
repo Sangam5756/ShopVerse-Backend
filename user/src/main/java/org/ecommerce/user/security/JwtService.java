@@ -1,75 +1,86 @@
+// Updating JwtService.java
 package org.ecommerce.user.security;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.ecommerce.user.model.User;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
-
-@Component
+@Service
 public class JwtService {
 
-    @Value("${jwt.secret}")
-    private String secret;
+	@Value("${jwt.secret}")
+	private String secret;
 
-    @Value("${jwt.expiration-ms}")
-    private Long expirationMs;
+	@Value("${jwt.expiration-ms}")
+	private long jwtExpirationMs;
 
+	public String extractUsername(String token) {
+		return extractClaim(token, Claims::getSubject);
+	}
 
-    public String generateToken(User user){
-//in jwts it only expect the date not localDate
-        Date now = new Date();
-        Date exp = new Date(now.getTime()+expirationMs); //see here will add the current time plus future expiration time
+	public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+		final Claims claims = extractAllClaims(token);
+		return claimsResolver.apply(claims);
+	}
 
-//        here we builded the security token
-        return Jwts.builder().
-                setSubject(user.getEmail()).
-                claim("role",user.getRole().name())
-                .claim("fullname",user.getFullName())
-                .setIssuedAt(now)
-                .setExpiration(exp)
-                .signWith(Keys.hmacShaKeyFor(secret.getBytes()), SignatureAlgorithm.HS256)
-                .compact();
-    }
+	public String generateToken(User user) {
+		return generateToken(new HashMap<>(), user);
+	}
 
+	public String generateToken(
+			Map<String, Object> extraClaims,
+			User user
+	) {
+		// Add role to the claims if not already present
+		if (user.getRole() != null) {
+			extraClaims.put("role", user.getRole().name());
+		}
+		
+		return Jwts
+				.builder()
+				.setClaims(extraClaims)
+				.setSubject(user.getEmail())
+				.setIssuedAt(new Date(System.currentTimeMillis()))
+				.setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+				.signWith(getSignInKey(), SignatureAlgorithm.HS256)
+				.compact();
+	}
 
-    public String extractFullName(String token) {
-        return parseClaims(token).get("fullName", String.class);
-    }
+	public boolean isTokenValid(String token, UserDetails userDetails) {
+		final String username = extractUsername(token);
+		return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+	}
 
-    public String extractRole(String token) {
-        return parseClaims(token).get("role", String.class);
-    }
+	private boolean isTokenExpired(String token) {
+		return extractExpiration(token).before(new Date());
+	}
 
+	private Date extractExpiration(String token) {
+		return extractClaim(token, Claims::getExpiration);
+	}
 
-    //    here this function extract the email from token
-    public String extractEmail(String token){
-        return parseClaims(token).getSubject();
-    }
+	private Claims extractAllClaims(String token) {
+		return Jwts
+				.parserBuilder()
+				.setSigningKey(getSignInKey())
+				.build()
+				.parseClaimsJws(token)
+				.getBody();
+	}
 
-    public boolean isValid(String token){
-        try{
-            parseClaims(token);
-            return true;
-        }catch (Exception e){
-            return false;
-        }
-    }
-
-
-//    parsedClaims method
-    public Claims parseClaims(String token){
-        return Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-
-
-
-
+	private Key getSignInKey() {
+		byte[] keyBytes = secret.getBytes();
+		return Keys.hmacShaKeyFor(keyBytes);
+	}
 }

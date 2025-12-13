@@ -1,2 +1,2 @@
 .idea
-**/application.properties
+./config-repo

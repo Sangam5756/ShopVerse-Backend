@@ -1,15 +1,19 @@
 package org.ecommerce.user.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.ecommerce.user.dto.UserResponseDTO;
-import org.ecommerce.user.mapper.UserMapper;
+import org.ecommerce.user.dto.AddressDTO;
+import org.ecommerce.user.dto.UserCreateRequest;
+import org.ecommerce.user.dto.UserResponse;
+import org.ecommerce.user.model.Role;
 import org.ecommerce.user.model.User;
 import org.ecommerce.user.repository.UserRepository;
-import org.modelmapper.ModelMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,42 +21,88 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
-    private final PasswordEncoder  passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-	@Override
-	public UserResponseDTO getUserByEmail(String email) {
-		User existUser = userRepository.findByEmail(email)
-				.orElseThrow(() -> new RuntimeException("User not found"));
-		existUser.getAddresses().size();
-		return UserMapper.mapToDto(existUser);
-	}
-
-	@Override
-    public User updateUser(Long id, User updated) {
-        User existing = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        existing.setFullName(updated.getFullName());
-
-//        change the email if only its need
-        if (!existing.getEmail().equals(updated.getEmail())) {
-            if (userRepository.existsByEmail(updated.getEmail()))
-                throw new RuntimeException("Email already in use");
-
-            existing.setEmail(updated.getEmail());
-        }
-
-        existing.setPhoneNo(updated.getPhoneNo());
-        existing.setRole(updated.getRole());
-
-        return userRepository.save(existing);
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getUserById(String email) {
+        User user = getUser(email);
+        return mapToResponse(user);
     }
 
     @Override
-    public void deleteUser(Long id) {
-        User existing =userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        userRepository.delete(existing);
+    @Transactional(readOnly = true)
+    public UserResponse getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
+        return mapToResponse(user);
     }
+
+    @Override
+    public UserResponse createUser(UserCreateRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Email already exists"
+            );
+        }
+
+        User user = new User();
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+        user.setPhoneNo(request.getPhoneNo());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(Role.CUSTOMER);
+        return mapToResponse(userRepository.save(user));
+    }
+
+    @Override
+    public UserResponse updateProfile(String email, UserCreateRequest request) {
+        User user = getUser(email);
+
+        user.setFullName(request.getFullName());
+        user.setPhoneNo(request.getPhoneNo());
+
+        return mapToResponse(user);
+    }
+
+    @Override
+    public void deleteUser(String email) {
+        User user = getUser(email);
+        userRepository.delete(user);
+    }
+
+    private User getUser(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
+    }
+
+    private UserResponse mapToResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .phoneNo(user.getPhoneNo())
+                .role(user.getRole())
+                .addresses(
+                        user.getAddresses() == null
+                                ? List.of()
+                                : user.getAddresses().stream()
+                                .map(a -> new AddressDTO(
+                                        a.getAddressId(),
+                                        a.getCity(),
+                                        a.getState(),
+                                        a.getCountry(),
+                                        a.getPincode()))
+                                .toList()
+                )
+                .build();
+    }
+
 }

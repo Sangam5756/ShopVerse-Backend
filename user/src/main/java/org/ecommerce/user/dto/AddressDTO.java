@@ -1,20 +1,15 @@
 package org.ecommerce.user.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Getter @Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class AddressDTO {
-    Long addressId;
-    String city;
-    String state;
-    String country;
-    String pincode;
-
-
-
+    private Long addressId;
+    private String city;
+    private String state;
+    private String country;
+    private String pincode;
 }
+

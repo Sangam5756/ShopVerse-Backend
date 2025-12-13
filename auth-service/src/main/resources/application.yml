@@ -1,0 +1,26 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: auth-service
+
+  security:
+    user:
+      name: disabled
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+jwt:
+  secret: zHTsXE9shK0N2kyZZ30cbXvpM8gNOwRIUN51rKIgIX97jeeF7jOQs744PI+Md9KiCRDEmwFODE7CcZxuKKiePg==
+  expiration: 86400000
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+

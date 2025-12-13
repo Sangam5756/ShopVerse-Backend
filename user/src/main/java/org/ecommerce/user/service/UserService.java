@@ -1,15 +1,17 @@
 package org.ecommerce.user.service;
 
-import org.ecommerce.user.dto.UserResponseDTO;
-import org.ecommerce.user.model.User;
+import org.ecommerce.user.dto.UserCreateRequest;
+import org.ecommerce.user.dto.UserResponse;
 
 public interface UserService {
 
+    UserResponse getUserById(String email);
 
-    UserResponseDTO getUserByEmail(String email);
+    UserResponse getUserByEmail(String email);
 
-    User updateUser(Long id, User updated);
+    UserResponse createUser(UserCreateRequest request);
 
-    void deleteUser(Long id);
+    UserResponse updateProfile(String email, UserCreateRequest request);
 
+    void deleteUser(String email);
 }

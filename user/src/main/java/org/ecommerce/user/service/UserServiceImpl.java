@@ -20,25 +20,15 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder  passwordEncoder;
 
+	@Override
+	public UserResponseDTO getUserByEmail(String email) {
+		User existUser = userRepository.findByEmail(email)
+				.orElseThrow(() -> new RuntimeException("User not found"));
+		existUser.getAddresses().size();
+		return UserMapper.mapToDto(existUser);
+	}
 
-
-
-
-    @Override
-    public UserResponseDTO getUser() {
-        String email = (String) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-
-        System.out.println(email);
-        User existUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-       existUser.getAddresses().size();
-       return UserMapper.mapToDto(existUser);
-
-    }
-
-    @Override
+	@Override
     public User updateUser(Long id, User updated) {
         User existing = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));

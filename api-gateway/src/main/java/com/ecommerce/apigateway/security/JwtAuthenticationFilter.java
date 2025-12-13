@@ -6,9 +6,11 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -16,7 +18,6 @@ import reactor.core.publisher.Mono;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.function.Predicate;
 
 @Component
 public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAuthenticationFilter.Config> {
@@ -62,15 +63,22 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 					return onError(exchange, "Invalid token", HttpStatus.UNAUTHORIZED);
 				}
 
+				// Extract claims from JWT
+				Claims claims = getJwtClaims(token);
+				String userId = claims.getSubject();
+				String email = claims.get("sub", String.class); // Get email from 'sub' claim
+
 				// Add user details to the request headers
-				String userId = getUserIdFromJwt(token);
 				ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
 						.header("X-User-Id", userId)
+						.header("X-User-Email", email) // Add email header
 						.build();
+
+				System.out.println(modifiedRequest);
 
 				return chain.filter(exchange.mutate().request(modifiedRequest).build());
 			} catch (Exception e) {
-				return onError(exchange, "Invalid token", HttpStatus.UNAUTHORIZED);
+				return onError(exchange, "Invalid token: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
 			}
 		};
 	}
@@ -79,9 +87,21 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 		return openEndpoints.stream().anyMatch(path::startsWith);
 	}
 
-	private Mono<Void> onError(ServerWebExchange exchange, String error, HttpStatus httpStatus) {
-		exchange.getResponse().setStatusCode(httpStatus);
-		return exchange.getResponse().setComplete();
+	private Mono<Void> onError(ServerWebExchange exchange, String err, HttpStatus httpStatus) {
+		ServerHttpResponse response = exchange.getResponse();
+		response.setStatusCode(httpStatus);
+		response.getHeaders().add(HttpHeaders.CONTENT_TYPE, "application/json");
+		String errorMessage = "{\"error\": \"" + err + "\"}";
+		DataBuffer buffer = response.bufferFactory().wrap(errorMessage.getBytes(StandardCharsets.UTF_8));
+		return response.writeWith(Mono.just(buffer));
+	}
+
+	private String getAuthHeader(ServerHttpRequest request) {
+		return request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+	}
+
+	private boolean isAuthMissing(ServerHttpRequest request) {
+		return getAuthHeader(request) == null || !getAuthHeader(request).startsWith("Bearer ");
 	}
 
 	private boolean isJwtValid(String token) {
@@ -91,10 +111,6 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 		} catch (Exception e) {
 			return false;
 		}
-	}
-
-	private String getUserIdFromJwt(String token) {
-		return getJwtClaims(token).getSubject();
 	}
 
 	private Claims getJwtClaims(String token) {

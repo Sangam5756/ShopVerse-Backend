@@ -10,3 +10,15 @@ spring:
         max-interval: 2000
         max-attempts: 6
         multiplier: 1.1
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+    info:
+      enabled: true

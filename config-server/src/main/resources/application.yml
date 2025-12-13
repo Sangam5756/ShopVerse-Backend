@@ -2,6 +2,8 @@ server:
   port: 8888
 
 spring:
+  profiles:
+    active: git
   application:
     name: config-server
   cloud:
@@ -10,24 +12,22 @@ spring:
         git:
           uri: https://github.com/iKirtesh/shopverse-config-repo.git
           username: ikirtesh
-          password: ${GITHUB_TOKEN}
-          search-paths: '{application},'
+          password: ${GITHUB_TOKEN:}  # Empty default
+          search-paths: '{application}'
           clone-on-start: true
           default-label: main
           force-pull: true
-          timeout: 10
+          timeout: 5000
           skip-ssl-validation: false
+          basedir: ./config-repo
+          delete-untracked-branches: true
 
 # Eureka Client Configuration
 eureka:
   client:
-    register-with-eureka: true
-    fetch-registry: true
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
-  instance:
-    prefer-ip-address: true
-    instance-id: ${spring.application.name}:${random.value}
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
 
 # Actuator Configuration
 management:

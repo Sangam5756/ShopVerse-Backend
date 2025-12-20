@@ -1,14 +1,16 @@
 package org.ecommerce.user.service;
 
-import org.ecommerce.user.model.Address;
+import org.ecommerce.user.dto.AddressDTO;
 
 import java.util.List;
 
 public interface AddressService {
 
-    Address addAddress(Long userId, Address address);
+    AddressDTO addAddress(Long userId, AddressDTO addressDTO);
 
-    List<Address> getAddresses(Long userId);
+    List<AddressDTO> getAddressesByUser(Long userId);
 
-    void deleteAddress(Long addressId);
+    AddressDTO updateAddress(Long userId, Long addressId, AddressDTO addressDTO);
+
+    void deleteAddress(Long userId, Long addressId);
 }

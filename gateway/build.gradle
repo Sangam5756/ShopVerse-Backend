@@ -24,19 +24,15 @@ repositories {
 }
 
 dependencies {
-<<<<<<< HEAD:api-gateway/build.gradle
     // Spring Cloud Gateway
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway-server-webflux'
     
     // Service Discovery
-=======
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway-server-webflux'
->>>>>>> 74bdf8e8d448ad412b472d9bf8d2291ddd827a20:gateway/build.gradle
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-<<<<<<< HEAD:api-gateway/build.gradle
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
     
@@ -48,12 +44,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-=======
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
->>>>>>> 74bdf8e8d448ad412b472d9bf8d2291ddd827a20:gateway/build.gradle
 }
 
 

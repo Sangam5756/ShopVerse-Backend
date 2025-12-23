@@ -1,0 +1,107 @@
+{
+  "content": [
+    {
+      "id": 3,
+      "name": "Bluetooth Portable Speaker",
+      "description": "Compact Bluetooth speaker with deep bass, 12-hour playtime, and IPX7 waterproof rating.",
+      "price": 2499.5,
+      "stockQuantity": 150,
+      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9kP0X0J7sCwR",
+      "brand": null,
+      "categoryId": 1,
+      "active": true,
+      "createdAt": "2025-12-22T21:02:26.150823",
+      "updatedAt": "2025-12-22T21:02:26.150823"
+    },
+    {
+      "id": 6,
+      "name": "Full HD Webcam",
+      "description": "1080p USB webcam with built-in microphone, low-light correction, and plug-and-play support.",
+      "price": 3499,
+      "stockQuantity": 95,
+      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcWEBCAMIMG",
+      "brand": null,
+      "categoryId": 1,
+      "active": true,
+      "createdAt": "2025-12-22T21:03:05.528508",
+      "updatedAt": "2025-12-22T21:03:05.528508"
+    },
+    {
+      "id": 2,
+      "name": "Smart Fitness Band",
+      "description": "Water-resistant fitness band with heart rate monitoring, sleep tracking, and 14-day battery life.",
+      "price": 2999,
+      "stockQuantity": 200,
+      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3gkXW2R6M9Jc9D4",
+      "brand": null,
+      "categoryId": 1,
+      "active": true,
+      "createdAt": "2025-12-22T21:01:59.341882",
+      "updatedAt": "2025-12-22T21:01:59.341882"
+    },
+    {
+      "id": 5,
+      "name": "USB-C Fast Charging Power Adapter",
+      "description": "65W USB-C fast charger compatible with smartphones, tablets, and laptops.",
+      "price": 1599,
+      "stockQuantity": 300,
+      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcFASTCHARGER",
+      "brand": null,
+      "categoryId": 1,
+      "active": true,
+      "createdAt": "2025-12-22T21:02:54.219433",
+      "updatedAt": "2025-12-22T21:02:54.223308"
+    },
+    {
+      "id": 4,
+      "name": "Wireless Gaming Mouse",
+      "description": "High-precision wireless gaming mouse with adjustable DPI, RGB lighting, and ergonomic design.",
+      "price": 1899.99,
+      "stockQuantity": 180,
+      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfX2MOUSEIMG",
+      "brand": null,
+      "categoryId": 1,
+      "active": true,
+      "createdAt": "2025-12-22T21:02:45.002947",
+      "updatedAt": "2025-12-22T21:02:45.002947"
+    },
+    {
+      "id": 1,
+      "name": "Wireless Noise Cancelling Headphones",
+      "description": "Over-ear Bluetooth headphones with active noise cancellation, 40-hour battery life, and fast charging support.",
+      "price": 8999.99,
+      "stockQuantity": 120,
+      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKXawO-QNCkHeuEamKJWWW4xwtgM6Al3NDKw&s",
+      "brand": null,
+      "categoryId": 1,
+      "active": true,
+      "createdAt": "2025-12-22T20:54:55.030931",
+      "updatedAt": "2025-12-22T20:54:55.030931"
+    }
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 10,
+    "sort": {
+      "empty": false,
+      "sorted": true,
+      "unsorted": false
+    },
+    "offset": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  "totalPages": 1,
+  "totalElements": 6,
+  "last": true,
+  "size": 10,
+  "number": 0,
+  "sort": {
+    "empty": false,
+    "sorted": true,
+    "unsorted": false
+  },
+  "first": true,
+  "numberOfElements": 6,
+  "empty": false
+}

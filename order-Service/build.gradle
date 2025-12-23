@@ -1,0 +1,74 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'org.sangam'
+version = '0.0.1-SNAPSHOT'
+description = 'order-Service'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    springCloudVersion = "2025.0.0"
+    springBootAdminVersion = "3.5.6"
+}
+
+dependencies {
+
+    /* ================= CORE ================= */
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    testImplementation 'io.projectreactor:reactor-test'
+
+    /* ================= DATABASE ================= */
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    /* ================= SERVICE DISCOVERY ================= */
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+    /* ================= API DOCS ================= */
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14'
+
+    /* ================= LOMBOK ================= */
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    /* ================= DEV ================= */
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+
+
+
+    /* ================= TEST ================= */
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

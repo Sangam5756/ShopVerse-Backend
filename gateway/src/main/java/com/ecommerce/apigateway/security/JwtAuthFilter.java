@@ -22,11 +22,18 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     }
 
     /* ================= PUBLIC ================= */
-    private static final List<String> PUBLIC_PATHS = List.of(
-            "/api/auth",
+
+    // Full access (GET, POST, PUT, etc.)
+    private static final List<String> PUBLIC_ALL_METHODS = List.of(
+            "/api/auth"
+    );
+
+    // Read-only access
+    private static final List<String> PUBLIC_GET_ONLY = List.of(
             "/api/products",
             "/api/categories"
     );
+
 
     /* ================= RBAC ================= */
     private static final Map<String, List<String>> ROLE_RULES = Map.of(
@@ -84,9 +91,15 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     /* ================= HELPERS ================= */
 
     private boolean isPublic(String path, HttpMethod method) {
+
+        if (PUBLIC_ALL_METHODS.stream().anyMatch(path::startsWith)) {
+            return true;
+        }
+
         return method == HttpMethod.GET &&
-                PUBLIC_PATHS.stream().anyMatch(path::startsWith);
+                PUBLIC_GET_ONLY.stream().anyMatch(path::startsWith);
     }
+
 
     private boolean isAuthorized(String path, String role) {
         return ROLE_RULES.entrySet().stream()

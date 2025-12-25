@@ -6,7 +6,7 @@ plugins {
 
 group = 'org.ecommerce'
 version = '0.0.1-SNAPSHOT'
-description = 'order-Service'
+description = 'payment-Service'
 
 java {
     toolchain {

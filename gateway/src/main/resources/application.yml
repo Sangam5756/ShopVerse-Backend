@@ -29,6 +29,11 @@ spring:
               uri: lb://PRODUCT-SERVICE
               predicates:
                 - Path=/api/categories/**
+
+            - id: notification-service
+              uri: lb://NOTIFICATION-SERVICE
+              predicates:
+                - Path=/api/notifications/**
   security:
     user:
       name: disabled

@@ -5,6 +5,7 @@ import com.ecommerce.auth.dto.AuthRequest;
 import com.ecommerce.auth.dto.AuthResponse;
 import com.ecommerce.auth.dto.UserRegistrationRequest;
 import com.ecommerce.auth.dto.UserResponse;
+import com.ecommerce.auth.producer.AuthEventPublisher;
 import com.ecommerce.auth.security.CustomUserDetailsService;
 import com.ecommerce.auth.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,8 @@ public class AuthController {
     private final CustomUserDetailsService authService;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserServiceClient userServiceClient;
+    private final AuthEventPublisher authEventPublisher;
+
 
     @PostMapping("/login")
     public Mono<AuthResponse> login(@RequestBody AuthRequest request) {
@@ -35,6 +38,9 @@ public class AuthController {
                             user.getFullName(),
                             user.getRole()
                     );
+
+                    authEventPublisher.userLoggedIn(user.getEmail());
+
                     return new AuthResponse(token, "Bearer");
                 })
                 .onErrorResume(e ->
@@ -48,6 +54,10 @@ public class AuthController {
 
     @PostMapping("/register")
     public Mono<UserResponse> register(@RequestBody UserRegistrationRequest request) {
-        return userServiceClient.createUser(request);
+
+        return userServiceClient.createUser(request)
+                .doOnNext(user ->
+                        authEventPublisher.userRegistered(user.getEmail())
+                );
     }
 }

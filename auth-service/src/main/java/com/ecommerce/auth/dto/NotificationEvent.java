@@ -11,6 +11,6 @@ import java.time.Instant;
 public class NotificationEvent {
     private String userEmail;
     private String message;
-    private String evenType;
+    private String eventType;
     private Instant timestamp;
 }

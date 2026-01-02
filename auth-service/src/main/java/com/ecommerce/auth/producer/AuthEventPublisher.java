@@ -16,7 +16,7 @@ public class AuthEventPublisher {
     public void userLoggedIn(String email) {
         NotificationEvent event = NotificationEvent.builder()
                 .userEmail(email)
-                .evenType("USER_LOGIN")
+                .eventType("USER_LOGIN")
                 .message("User logged in successfully")
                 .timestamp(Instant.now())
                 .build();
@@ -27,7 +27,7 @@ public class AuthEventPublisher {
     public void userRegistered(String email) {
         NotificationEvent event = NotificationEvent.builder()
                 .userEmail(email)
-                .evenType("USER_REGISTER")
+                .eventType("USER_REGISTER")
                 .message("Account created successfully")
                 .timestamp(Instant.now())
                 .build();

@@ -23,3 +23,7 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     enabled: true
+
+logging:
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG

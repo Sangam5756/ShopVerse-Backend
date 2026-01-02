@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -14,6 +14,6 @@ import java.time.Instant;
 public class NotificationEvent {
     private String userEmail;
     private String message;
-    private String evenType;
-    private Instant timestamp;
+    private String eventType;
+    private LocalDateTime timestamp;
 }

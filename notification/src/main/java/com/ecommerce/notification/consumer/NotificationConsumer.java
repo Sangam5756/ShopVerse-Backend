@@ -8,14 +8,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Component
 @RequiredArgsConstructor
 public class NotificationConsumer {
 
     private final NotificationRepository repository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @KafkaListener(
             topics = "notification-topic",
@@ -29,9 +29,13 @@ public class NotificationConsumer {
 
             Notification notification = Notification.builder()
                     .userEmail(event.getUserEmail())
-                    .eventType(event.getEvenType())
+                    .eventType(event.getEventType())
                     .message(event.getMessage())
-                    .timestamp(LocalDateTime.from(event.getTimestamp()))
+                    .timestamp(
+                            event.getTimestamp()
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDateTime()
+                    )
                     .read(false)
                     .build();
 
@@ -43,3 +47,4 @@ public class NotificationConsumer {
         }
     }
 }
+

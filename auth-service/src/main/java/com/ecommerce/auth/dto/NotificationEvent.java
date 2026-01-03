@@ -2,7 +2,7 @@ package com.ecommerce.auth.dto;
 
 import lombok.*;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -10,7 +10,8 @@ import java.time.Instant;
 @Builder
 public class NotificationEvent {
     private String userEmail;
+    private String role;
     private String message;
     private String eventType;
-    private Instant timestamp;
+    private LocalDateTime timestamp;
 }

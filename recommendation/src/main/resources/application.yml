@@ -1,15 +1,15 @@
 server:
-  port: 8086
+  port: 8088
 
 spring:
   application:
-    name: notification-service
+    name: recommendation-service
 
   kafka:
     bootstrap-servers: localhost:9092
 
   mongodb:
-    uri: mongodb://localhost:27017/notifications
+    uri: mongodb://localhost:27017/recommendations
 
 eureka:
   client:

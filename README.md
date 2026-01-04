@@ -24,64 +24,126 @@ ShopVerse is a modern, data-driven e-commerce platform built with a microservice
 ## 🏗️ System Architecture
 
 ```mermaid
-graph TD
-    %% Clients
-    Web[Web Client] -->|HTTPS| API[API Gateway]
-    Mobile[Mobile App] -->|HTTPS| API
-    Admin[Admin Panel] -->|HTTPS| API
+---
+config:
+  layout: fixed
+---
+flowchart TB
+ subgraph CLIENT["Client"]
+    direction TB
+        Web["Web Client"]
+  end
+ subgraph GATEWAY["Gateway"]
+    direction TB
+        API["API Gateway"]
+  end
+ subgraph SERVICES["Services"]
+    direction TB
+        Auth["Auth Service"]
+        User["User Service"]
+        Product["Product Service"]
+        Order["Order Service"]
+        Payment["Payment Service"]
+  end
+ subgraph EVENTBUS["Event Bus"]
+    direction TB
+        Kafka[("Kafka Event Bus")]
+  end
+ subgraph CONSUMERS["Events Consumer"]
+    direction TB
+        Analytics["Analytics Service"]
+        Notification["Notification Service"]
+        Recommendation["Recommendation Service"]
+  end
+ subgraph DATASTORES["Data Store"]
+    direction TB
+        MySQL[("MySQL")]
+        PostgreSQL[("PostgreSQL")]
+        MongoDB[("MongoDB")]
+        ClickHouse[("ClickHouse")]
+        Redis[("Redis Cache")]
+  end
+ subgraph OBSERVABILITY["Observability"]
+    direction TB
+        Prometheus["Prometheus"]
+        Grafana["Grafana"]
+        AdminServer["Spring Boot Admin"]
+  end
+    CLIENT --> GATEWAY
+    GATEWAY --> SERVICES
+    SERVICES --> EVENTBUS
+    EVENTBUS --> CONSUMERS
+    User -- MySQL --> MySQL
+    Auth -- MySQL --> MySQL
+    Product -- MySQL --> MySQL
+    Order -- MySQL --> MySQL
+    Payment -- PostgreSQL --> PostgreSQL
+    Notification -- MongoDB --> MongoDB
+    Recommendation -- MongoDB --> MongoDB
+    Analytics -- ClickHouse --> ClickHouse
+    Recommendation -- Cache --> Redis
+    API -- RateLimit/TokenCache --> Redis
+    Kafka -- Offset/Cache --> Redis
+    OBSERVABILITY -.-> GATEWAY & SERVICES & EVENTBUS & CONSUMERS & DATASTORES
 
-    %% API Gateway
-    API -->|Load Balance| Auth[Auth Service]
-    API -->|Route| User[User Service]
-    API -->|Route| Product[Product Service]
-    API -->|Route| Order[Order Service]
-    API -->|Route| Payment[Payment Service]
-    
-    %% Service Communication
-    subgraph Microservices
-        Auth -->|JWT| User
-        User -->|REST| Auth
-        Order -->|REST| Product
-        Order -->|REST| Payment
-        
-        %% Event-Driven Services
-        Order -->|Events| Kafka[(Kafka)]
-        Product -->|Events| Kafka
-        Payment -->|Events| Kafka
-        
-        Kafka -->|Consume| Analytics[Analytics Service]
-        Kafka -->|Consume| Notification[Notification Service]
-        Kafka -->|Consume| Recommendation[Recommendation Service]
-    end
-    
-    %% Data Stores
-    subgraph Data Layer
-        AuthDB[(MySQL)] <--> Auth
-        UserDB[(MongoDB)] <--> User
-        ProductDB[(MongoDB)] <--> Product
-        OrderDB[(MySQL)] <--> Order
-        PaymentDB[(PostgreSQL)] <--> Payment
-        AnalyticsDB[(ClickHouse)] <--> Analytics
-        Redis[(Redis Cache)] <-->|Caching| API
-    end
-    
-    %% Monitoring
-    AdminServer[Admin Server] -->|Monitor| Microservices
-    Prometheus -->|Metrics| Microservices
-    Grafana -->|Visualize| Prometheus
-    
-    %% Style
-    classDef client fill:#f9f,stroke:#333,stroke-width:1px;
-    classDef service fill:#bbf,stroke:#333,stroke-width:1px;
-    classDef queue fill:#f96,stroke:#333,stroke-width:1px;
-    classDef database fill:#9f9,stroke:#333,stroke-width:1px;
-    classDef monitor fill:#ff9,stroke:#333,stroke-width:1px;
-    
-    class Web,Mobile,Admin client;
-    class Auth,User,Product,Order,Payment,Notification,Analytics,Recommendation service;
-    class Kafka queue;
-    class AuthDB,UserDB,ProductDB,OrderDB,PaymentDB,AnalyticsDB,Redis database;
-    class AdminServer,Prometheus,Grafana monitor;
+     Web:::client
+     API:::gateway
+     Auth:::service
+     User:::service
+     Product:::service
+     Order:::service
+     Payment:::service
+     Kafka:::eventbus
+     Analytics:::consumer
+     Notification:::consumer
+     Recommendation:::consumer
+     MySQL:::database
+     PostgreSQL:::client
+     MongoDB:::database
+     ClickHouse:::database
+     Redis:::database
+     Prometheus:::monitor
+     Grafana:::monitor
+     AdminServer:::monitor
+    classDef gateway fill:#388e3c,stroke:#1b5e20,stroke-width:2px,color:#fff
+    classDef service fill:#7e57c2,stroke:#4527a0,stroke-width:2px,color:#fff
+    classDef eventbus fill:#ef6c00,stroke:#e65100,stroke-width:2px,color:#fff
+    classDef consumer fill:#00897b,stroke:#004d40,stroke-width:2px,color:#fff
+    classDef database fill:#263238,stroke:#789262,stroke-width:2px,color:#fff
+    classDef monitor fill:#37474F,stroke:#13181b,stroke-width:2px,color:#fff
+    classDef client fill:#1565c0, stroke:#002f6c, stroke-width:2px, color:#fff
+    style API fill:#00C853
+    style Kafka stroke:#FFFFFF
+    style MySQL fill:#AA00FF
+    style PostgreSQL fill:#2962FF,stroke-width:4px,stroke-dasharray: 0
+    style MongoDB fill:#00C853,stroke:#424242
+    style ClickHouse fill:#FFD600,stroke:#424242,color:#000000
+    style Redis fill:#D50000,stroke:#FFFFFF,stroke-width:2px,stroke-dasharray: 0
+    style Prometheus fill:#2962FF,stroke:#FFFFFF
+    style Grafana fill:#2962FF,stroke:#FFFFFF
+    style AdminServer fill:#2962FF,stroke:#FFFFFF
+    style CLIENT stroke:#1565c0,stroke-width:3px
+    style GATEWAY stroke:#388e3c,stroke-width:3px
+    style SERVICES stroke:#7e57c2,stroke-width:3px
+    style EVENTBUS stroke:#ef6c00,stroke-width:3px,fill:#FF6D00,color:#FFFFFF
+    style CONSUMERS stroke:#00897b,stroke-width:3px
+    style OBSERVABILITY stroke:#2962FF,stroke-width:3px,fill:#2962FF,color:#FFFFFF
+    style DATASTORES stroke:#E1BEE7,stroke-width:3px,fill:transparent,color:#424242
+    linkStyle 1 stroke:#00C853,fill:none
+    linkStyle 2 stroke:#AA00FF,fill:none
+    linkStyle 3 stroke:#FF6D00,fill:none
+    linkStyle 4 stroke:#AA00FF,fill:none
+    linkStyle 5 stroke:#AA00FF,fill:none
+    linkStyle 6 stroke:#AA00FF,fill:none
+    linkStyle 7 stroke:#AA00FF,fill:none
+    linkStyle 8 stroke:#AA00FF,fill:none
+    linkStyle 13 stroke:#00C853,fill:none
+    linkStyle 14 stroke:#FF6D00,fill:none
+    linkStyle 15 stroke:#2962FF,fill:none
+    linkStyle 16 stroke:#2962FF,fill:none
+    linkStyle 17 stroke:#2962FF,fill:none
+    linkStyle 18 stroke:#2962FF,fill:none
+    linkStyle 19 stroke:#2962FF,fill:none
 ```
 
 ### Architecture Components
@@ -129,7 +191,7 @@ graph TD
 - **Backend**: Java 21, Spring Boot 3.x +, Spring Cloud
 - **Frontend**: React.js, Redux, Tailwind CSS
 - **Database**: MySQL, MongoDB, PostgreSQL, ClickHouse, Redis (Caching)
-- **Message Broker**: Apache Kafka, Apache Apache
+- **Message Broker**: Apache Kafka, Apache Flink
 - **Service Discovery**: Spring Cloud Netflix Eureka
 - **API Gateway**: Spring Cloud Gateway
 - **Authentication**: JWT, Spring Security

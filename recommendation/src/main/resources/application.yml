@@ -8,8 +8,9 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
 
-  mongodb:
-    uri: mongodb://localhost:27017/recommendations
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/recommendations
 
 eureka:
   client:
@@ -27,3 +28,18 @@ springdoc:
 logging:
   level:
     org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}

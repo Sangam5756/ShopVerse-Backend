@@ -62,7 +62,7 @@ needs_rebuild () {
 
 # ---------------- Start Docker infra ----------------
 echo "🐳 Starting Docker infrastructure..."
-docker compose up -d kafka zookeeper mysql redis mongodb >/dev/null 2>&1
+docker compose up -d kafka zookeeper mysql redis mongodb grafana prometheus zipkin >/dev/null 2>&1
 sleep 5
 
 echo "✅ Docker infrastructure ready"
@@ -180,6 +180,20 @@ echo "=============================================================="
 echo ""
 echo "🔍 Eureka Dashboard : http://localhost:8761"
 echo "🚪 API Gateway      : http://localhost:8080"
+echo ""
+echo "📈 Tool	URL"
+echo "🔍 Prometheus	http://localhost:9090"
+echo "📈 Grafana	http://localhost:3000"
+echo "🔑 Grafana Login	admin / admin"
+echo ""
+echo "   In Grafana → Import Dashboard"
+echo "   Use these IDs:"
+echo "   Purpose Dashboard    ID"
+echo "   Spring Boot	       4701"
+echo "   JVM Metrics	       4701"
+echo "   Kafka	             721"
+echo "   Docker	             893"
+echo ""
 echo ""
 echo "📁 Logs directory   : logs/"
 echo "📄 Example          : tail -f logs/gateway.log"

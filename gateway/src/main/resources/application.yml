@@ -7,6 +7,9 @@ spring:
 
   cloud:
     gateway:
+      httpclient:
+        observation:
+          enabled: true
       server:
         webflux:
           routes:
@@ -25,7 +28,7 @@ spring:
               predicates:
                 - Path=/api/products/**
 
-            - id: product-service
+            - id: category-service
               uri: lb://PRODUCT-SERVICE
               predicates:
                 - Path=/api/categories/**
@@ -34,6 +37,13 @@ spring:
               uri: lb://NOTIFICATION-SERVICE
               predicates:
                 - Path=/api/notifications/**
+
+          default-filters:
+            PreserveHostHeader
+          metrics:
+            enabled: true
+
+
   security:
     user:
       name: disabled
@@ -48,3 +58,18 @@ eureka:
 
 jwt:
   secret: zHTsXE9shK0N2kyZZ30cbXvpM8gNOwRIUN51rKIgIX97jeeF7jOQs744PI+Md9KiCRDEmwFODE7CcZxuKKiePg==
+
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus

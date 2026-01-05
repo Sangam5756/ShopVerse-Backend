@@ -25,4 +25,11 @@ public class NotificationController {
 
         return repository.findByUserEmailOrderByTimestampDesc(email);
     }
+
+    @PutMapping("/{id}/read")
+    public void markAsRead(@PathVariable String id) {
+        Notification n = repository.findById(id).orElseThrow();
+        n.setRead(true);
+        repository.save(n);
+    }
 }

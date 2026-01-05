@@ -1,0 +1,49 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: analytics-service
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+  datasource:
+    driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+    url: jdbc:clickhouse://t8njuxf8ta.ap-south-1.aws.clickhouse.cloud:8443/default?ssl=true
+    username: default
+    password: K7YRBBW~jIL_Z
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      idle-timeout: 30000
+      connection-timeout: 20000
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+

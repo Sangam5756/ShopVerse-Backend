@@ -1,6 +1,10 @@
+server:
+  port: 8085
+
 spring:
   application:
     name: PAYMENT-SERVICE
+
   datasource:
     url: jdbc:mysql://localhost:3306/shopverse_payment?createDatabaseIfNotExist=true
     username: root
@@ -32,5 +36,19 @@ springdoc:
     path: "/v3/api-docs"
   swagger-ui:
     enabled: true
-server:
-  port: 8085
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+

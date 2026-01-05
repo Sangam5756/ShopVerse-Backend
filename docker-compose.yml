@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
   # ================= MYSQL =================
@@ -96,11 +94,73 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
+  # ================= ZIPKIN =================
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - microservices_network
+    restart: unless-stopped
+
+
+  # ================= PROMETHEUS =================
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - microservices_network
+
+  # ================= GRAFANA =================
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    networks:
+      - microservices_network
+  
+    # ================= CADVISER =================
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: cadvisor
+    ports:
+      - "8089:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - microservices_network
+    restart: unless-stopped
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.7.0
+    container_name: kafka-exporter
+    command:
+      - '--kafka.server=kafka:9092'
+    ports:
+      - "9308:9308"
+    depends_on:
+      - kafka
+    networks:
+      - microservices_network
+
 
 networks:
   microservices_network:
     driver: bridge
-
 
 volumes:
   mysql:

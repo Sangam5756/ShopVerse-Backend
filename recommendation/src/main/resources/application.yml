@@ -1,0 +1,45 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: recommendation-service
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/recommendations
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}

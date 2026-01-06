@@ -6,8 +6,8 @@ logs
 *.log.*
 
 # Build hash files
-**/.build-hash
-**/.build-hash.*
+git rm --cached **/.build-hash
+git rm --cached **/.build-hash.*
 
 # Local development environment files
 .env

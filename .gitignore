@@ -1,7 +1,7 @@
 .idea
 logs
 
-# Log files
+# Log files~
 *.log
 *.log.*
 

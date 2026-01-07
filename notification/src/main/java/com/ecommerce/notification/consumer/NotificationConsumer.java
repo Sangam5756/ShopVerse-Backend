@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneId;
+
 @Component
 @RequiredArgsConstructor
 public class NotificationConsumer {
@@ -16,12 +18,7 @@ public class NotificationConsumer {
     private final ObjectMapper objectMapper;
 
     @KafkaListener(
-            topics = {
-                    "user-events",
-                    "order-events",
-                    "payment-events",
-                    "product-events"
-            },
+            topics = "notification-topic",
             groupId = "notification-group"
     )
     public void consume(byte[] payload) {
@@ -32,17 +29,22 @@ public class NotificationConsumer {
 
             Notification notification = Notification.builder()
                     .userEmail(event.getUserEmail())
-                    .role(event.getRole())
                     .eventType(event.getEventType())
                     .message(event.getMessage())
-                    .timestamp(event.getTimestamp())
+                    .timestamp(
+                            event.getTimestamp()
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDateTime()
+                    )
                     .read(false)
                     .build();
 
             repository.save(notification);
 
         } catch (Exception e) {
+            // 🔥 In production → send to DLQ
             e.printStackTrace();
         }
     }
 }
+

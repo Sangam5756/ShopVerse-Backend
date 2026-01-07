@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Builder
 public class NotificationEvent {
     private String userEmail;
-    private String role;
     private String message;
     private String eventType;
     private LocalDateTime timestamp;

@@ -25,13 +25,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserResponse getUserById(String email) {
-        User user = getUser(email);
-        return mapToResponse(user);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public UserResponse getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -70,9 +63,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(String email) {
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
+    public UserResponse deleteUser(String email) {
         User user = getUser(email);
         userRepository.delete(user);
+        return null;
     }
 
     private User getUser(String email) {

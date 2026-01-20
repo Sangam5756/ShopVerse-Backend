@@ -3,9 +3,10 @@ package org.ecommerce.user.service;
 import org.ecommerce.user.dto.UserCreateRequest;
 import org.ecommerce.user.dto.UserResponse;
 
+import java.util.List;
+
 public interface UserService {
 
-    UserResponse getUserById(String email);
 
     UserResponse getUserByEmail(String email);
 
@@ -13,5 +14,7 @@ public interface UserService {
 
     UserResponse updateProfile(String email, UserCreateRequest request);
 
-    void deleteUser(String email);
+    UserResponse deleteUser(String email);
+
+    List<UserResponse> getAllUsers();
 }

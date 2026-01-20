@@ -51,7 +51,6 @@ public class AuthController {
                 );
     }
 
-
     @PostMapping("/register")
     public Mono<UserResponse> register(@RequestBody UserRegistrationRequest request) {
 

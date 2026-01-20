@@ -16,8 +16,9 @@ public class SecurityConfig {
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .authorizeExchange(exchange -> exchange
-                        .anyExchange().permitAll()
+                        .anyExchange().permitAll() // ✅ IMPORTANT
                 )
                 .build();
     }
 }
+

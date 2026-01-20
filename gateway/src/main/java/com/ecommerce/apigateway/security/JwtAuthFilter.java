@@ -3,6 +3,7 @@ package com.ecommerce.apigateway.security;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -10,10 +11,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Map;
 @Component
-public class JwtAuthFilter implements GlobalFilter, Ordered {
+@Order(-100)
+public class JwtAuthFilter implements GlobalFilter {
 
     private final JwtUtil jwtUtil;
 
@@ -21,26 +21,13 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         this.jwtUtil = jwtUtil;
     }
 
-    /* ================= PUBLIC ================= */
+    private boolean isPublic(String path, HttpMethod method) {
+        if (path.startsWith("/api/auth")) return true;
 
-    // Full access (GET, POST, PUT, etc.)
-    private static final List<String> PUBLIC_ALL_METHODS = List.of(
-            "/api/auth"
-    );
-
-    // Read-only access
-    private static final List<String> PUBLIC_GET_ONLY = List.of(
-            "/api/products",
-            "/api/categories"
-    );
-
-
-    /* ================= RBAC ================= */
-    private static final Map<String, List<String>> ROLE_RULES = Map.of(
-            "/api/products", List.of("ADMIN"),
-            "/api/categories", List.of("ADMIN"),
-            "/api/users", List.of("ADMIN", "CUSTOMER")
-    );
+        return method == HttpMethod.GET &&
+                (path.startsWith("/api/products")
+                        || path.startsWith("/api/categories"));
+    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -48,7 +35,6 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         String path = exchange.getRequest().getURI().getPath();
         HttpMethod method = exchange.getRequest().getMethod();
 
-        // 🌍 PUBLIC (GET only)
         if (isPublic(path, method)) {
             return chain.filter(exchange);
         }
@@ -58,65 +44,27 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
                 .getFirst(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return unauthorized(exchange);
+            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+            return exchange.getResponse().setComplete();
         }
 
         String token = authHeader.substring(7);
 
-        try {
-            String email = jwtUtil.getEmail(token);
-            String role = jwtUtil.getRole(token);
+        String email = jwtUtil.getEmail(token);
+        String role = jwtUtil.getRole(token);
 
-            // 🛡 RBAC
-            if (!isAuthorized(path, role)) {
-                exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-                return exchange.getResponse().setComplete();
-            }
+        System.out.println("Gateway injecting → " + email);
 
-            // ✅ Forward trusted headers
-            ServerWebExchange mutated = exchange.mutate()
-                    .request(r -> r
-                            .header("X-User-Email", email)
-                            .header("X-User-Role", role)
-                    )
-                    .build();
+        ServerWebExchange mutated = exchange.mutate()
+                .request(r -> r
+                        .headers(headers -> {
+                            headers.remove(HttpHeaders.AUTHORIZATION);
+                        })
+                        .header("X-User-Email", email)
+                        .header("X-User-Role", role)
+                )
+                .build();
 
-            return chain.filter(mutated);
-
-        } catch (Exception e) {
-            return unauthorized(exchange);
-        }
-    }
-
-    /* ================= HELPERS ================= */
-
-    private boolean isPublic(String path, HttpMethod method) {
-
-        if (PUBLIC_ALL_METHODS.stream().anyMatch(path::startsWith)) {
-            return true;
-        }
-
-        return method == HttpMethod.GET &&
-                PUBLIC_GET_ONLY.stream().anyMatch(path::startsWith);
-    }
-
-
-    private boolean isAuthorized(String path, String role) {
-        return ROLE_RULES.entrySet().stream()
-                .filter(e -> path.startsWith(e.getKey()))
-                .findFirst()
-                .map(e -> e.getValue().contains(role))
-                .orElse(true);
-    }
-
-    private Mono<Void> unauthorized(ServerWebExchange exchange) {
-        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-        return exchange.getResponse().setComplete();
-    }
-
-    @Override
-    public int getOrder() {
-        return -1;
+        return chain.filter(mutated);
     }
 }
-

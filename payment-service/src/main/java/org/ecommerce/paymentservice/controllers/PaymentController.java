@@ -6,17 +6,15 @@ import org.ecommerce.paymentservice.dtos.PaymentRequestDTO;
 import org.ecommerce.paymentservice.dtos.RazorpayCallbackDTO;
 import org.ecommerce.paymentservice.services.PaymentService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/payment")
+@RequestMapping("/api/payments")
 @RequiredArgsConstructor
 public class PaymentController {
 
     private final PaymentService paymentService;
+
 
 
     @PostMapping
@@ -29,6 +27,12 @@ public class PaymentController {
         paymentService.markPaymentSuccess(callback.getRazorpayOrderId(),callback.getRazorpayPaymentId());
         return ResponseEntity.ok("Payment Success");
     }
+
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<?> getAllPaymentByCustomerId(@PathVariable Long customerId){
+        return ResponseEntity.ok(paymentService.getPaymentsByCustomerId(customerId));
+    }
+
 
 
 }

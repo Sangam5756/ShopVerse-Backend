@@ -1,3 +1,11 @@
+server:
+  port: 8085
+
+razorpay:
+  key:
+    id: rzp_test_S6D1POxS8o4hAe
+    secret: yabt49hFitqCB5G1HukbSF2m
+
 spring:
   application:
     name: PAYMENT-SERVICE

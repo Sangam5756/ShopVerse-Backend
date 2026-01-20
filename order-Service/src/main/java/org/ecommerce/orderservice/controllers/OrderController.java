@@ -17,8 +17,6 @@ public class OrderController {
 
     private  final OrderServiceImpl orderService;
 
-
-
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody OrderRequestDTO request){
         OrderResponseDTO  orderResponseDTO = orderService.placeOrder(request);

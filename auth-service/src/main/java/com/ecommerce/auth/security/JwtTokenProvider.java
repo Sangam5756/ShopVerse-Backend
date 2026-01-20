@@ -28,50 +28,13 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(String email, String name, String role) {
-
-        Map<String, Object> claims = Map.of(
-                "role", role,
-                "name", name
-        );
-
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(email)  // ✅ email as sub
+                .setSubject(email)          // ✅ email as identity
+                .claim("role", role)        // ✅ single role
+                .claim("name", name)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(signingKey, SignatureAlgorithm.HS512)
                 .compact();
-    }
-
-
-    public boolean validateToken(String token) {
-        try {
-            parseClaims(token);
-            return true;
-        } catch (Exception ex) {
-            return false;
-        }
-    }
-
-    public String getUserEmail(String token) {
-        return parseClaims(token).getSubject();
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<String> getRoles(String token) {
-        return parseClaims(token).get("roles", List.class);
-    }
-
-    public boolean isTokenExpired(String token) {
-        Date expirationDate = parseClaims(token).getExpiration();
-        return expirationDate.before(new Date());
-    }
-
-    private Claims parseClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(signingKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
     }
 }

@@ -21,76 +21,91 @@ public class AddressServiceImpl implements AddressService {
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
 
-    @Override
-    public AddressDTO addAddress(Long userId, AddressDTO dto) {
-        User user = getUser(userId);
-
-        Address address = new Address();
-        address.setCity(dto.getCity());
-        address.setState(dto.getState());
-        address.setCountry(dto.getCountry());
-        address.setPincode(dto.getPincode());
-        address.setUser(user);
-
-        Address saved = addressRepository.save(address);
-
-        return mapToDTO(saved);
-    }
+    // ================= READ =================
 
     @Override
     @Transactional(readOnly = true)
-    public List<AddressDTO> getAddressesByUser(Long userId) {
-        User user = getUser(userId);
+    public List<AddressDTO> getAddressesByUser(String email) {
+
+        User user = getUser(email);
 
         return user.getAddresses()
                 .stream()
-                .map(this::mapToDTO)
+                .map(this::toDTO)
                 .toList();
     }
 
+    // ================= CREATE =================
+
     @Override
-    public AddressDTO updateAddress(Long userId, Long addressId, AddressDTO dto) {
-        Address address = getUserAddress(userId, addressId);
+    public AddressDTO addAddress(String email, AddressDTO dto) {
 
-        address.setCity(dto.getCity());
-        address.setState(dto.getState());
-        address.setCountry(dto.getCountry());
-        address.setPincode(dto.getPincode());
+        User user = getUser(email);
 
-        return mapToDTO(address);
+        Address address = new Address();
+        address.setCity(dto.city());
+        address.setState(dto.state());
+        address.setCountry(dto.country());
+        address.setPincode(dto.pincode());
+        address.setUser(user);
+
+        Address saved = addressRepository.save(address);
+        return toDTO(saved);
     }
 
+    // ================= UPDATE =================
+
     @Override
-    public void deleteAddress(Long userId, Long addressId) {
-        Address address = getUserAddress(userId, addressId);
+    public AddressDTO updateAddress(String email, Long addressId, AddressDTO dto) {
+
+        Address address = getOwnedAddress(email, addressId);
+
+        address.setCity(dto.city());
+        address.setState(dto.state());
+        address.setCountry(dto.country());
+        address.setPincode(dto.pincode());
+
+        return toDTO(address);
+    }
+
+    // ================= DELETE =================
+
+    @Override
+    public void deleteAddress(String email, Long addressId) {
+
+        Address address = getOwnedAddress(email, addressId);
         addressRepository.delete(address);
     }
 
-    private User getUser(Long userId) {
-        return userRepository.findById(userId)
+    // ================= HELPERS =================
+
+    private User getUser(String email) {
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "User not found"
                 ));
     }
 
-    private Address getUserAddress(Long userId, Long addressId) {
+    private Address getOwnedAddress(String email, Long addressId) {
+
         Address address = addressRepository.findById(addressId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Address not found"
                 ));
 
-        if (!address.getUser().getId().equals(userId)) {
+        if (!address.getUser().getEmail().equals(email)) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
-                    "Unauthorized address access"
+                    "Address does not belong to user"
             );
         }
+
         return address;
     }
 
-    private AddressDTO mapToDTO(Address address) {
+    private AddressDTO toDTO(Address address) {
         return new AddressDTO(
                 address.getAddressId(),
                 address.getCity(),

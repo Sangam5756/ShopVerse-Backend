@@ -15,12 +15,12 @@ import reactor.core.publisher.Mono;
 public class UserServiceClient {
 
     private final WebClient.Builder webClientBuilder;
-    private final String userServiceUrl = "http://USER-SERVICE";
+    private static final String USER_SERVICE = "http://USER-SERVICE";
 
     public Mono<InternalUserAuthResponse> getUserForAuth(String email) {
         return webClientBuilder.build()
                 .get()
-                .uri(userServiceUrl + "/api/internal/users/auth/{email}", email)
+                .uri(USER_SERVICE + "/api/internal/users/auth/{email}", email)
                 .retrieve()
                 .bodyToMono(InternalUserAuthResponse.class);
     }
@@ -28,20 +28,10 @@ public class UserServiceClient {
     public Mono<UserResponse> createUser(UserRegistrationRequest request) {
         return webClientBuilder.build()
                 .post()
-                .uri("http://USER-SERVICE/api/internal/users")
+                .uri(USER_SERVICE + "/api/internal/users")
                 .bodyValue(request)
                 .retrieve()
-                .onStatus(
-                        status -> status.is4xxClientError() || status.is5xxServerError(),
-                        response -> response.bodyToMono(ErrorResponse.class)
-                                .flatMap(error -> Mono.error(
-                                        new ResponseStatusException(
-                                                response.statusCode(),
-                                                error.getMessage()
-                                        )
-                                ))
-                )
                 .bodyToMono(UserResponse.class);
     }
-
 }
+

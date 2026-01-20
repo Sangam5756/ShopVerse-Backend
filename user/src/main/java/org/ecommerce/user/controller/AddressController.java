@@ -3,7 +3,7 @@ package org.ecommerce.user.controller;
 import lombok.RequiredArgsConstructor;
 import org.ecommerce.user.dto.AddressDTO;
 import org.ecommerce.user.service.AddressService;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,29 +15,37 @@ public class AddressController {
 
     private final AddressService addressService;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public AddressDTO addAddress(@RequestHeader("X-User-Id") Long userId,
-                                 @RequestBody AddressDTO dto) {
-        return addressService.addAddress(userId, dto);
+    @GetMapping
+    public List<AddressDTO> getMyAddresses(Authentication auth) {
+        String email = auth.getName();
+        return addressService.getAddressesByUser(email);
     }
 
-    @GetMapping
-    public List<AddressDTO> getAddresses(@RequestHeader("X-User-Id") Long userId) {
-        return addressService.getAddressesByUser(userId);
+    @PostMapping
+    public AddressDTO addAddress(
+            Authentication auth,
+            @RequestBody AddressDTO dto
+    ) {
+        String email = auth.getName();
+        return addressService.addAddress(email, dto);
     }
 
     @PutMapping("/{addressId}")
-    public AddressDTO updateAddress(@RequestHeader("X-User-Id") Long userId,
-                                    @PathVariable Long addressId,
-                                    @RequestBody AddressDTO dto) {
-        return addressService.updateAddress(userId, addressId, dto);
+    public AddressDTO updateAddress(
+            Authentication auth,
+            @PathVariable Long addressId,
+            @RequestBody AddressDTO dto
+    ) {
+        String email = auth.getName();
+        return addressService.updateAddress(email, addressId, dto);
     }
 
     @DeleteMapping("/{addressId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAddress(@RequestHeader("X-User-Id") Long userId,
-                              @PathVariable Long addressId) {
-        addressService.deleteAddress(userId, addressId);
+    public void deleteAddress(
+            Authentication auth,
+            @PathVariable Long addressId
+    ) {
+        String email = auth.getName();
+        addressService.deleteAddress(email, addressId);
     }
 }

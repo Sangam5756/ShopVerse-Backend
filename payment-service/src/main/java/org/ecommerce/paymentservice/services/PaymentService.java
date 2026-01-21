@@ -4,11 +4,13 @@ package org.ecommerce.paymentservice.services;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import lombok.AllArgsConstructor;
+import org.ecommerce.paymentservice.dtos.NotificationEvent;
 import org.ecommerce.paymentservice.dtos.PaymentRequestDTO;
 import org.ecommerce.paymentservice.dtos.PaymentResponseDTO;
 import org.ecommerce.paymentservice.dtos.PaymentSummaryDTO;
 import org.ecommerce.paymentservice.entities.Payment;
 import org.ecommerce.paymentservice.entities.PaymentStatus;
+import org.ecommerce.paymentservice.producer.PaymentEventPublisher;
 import org.ecommerce.paymentservice.repositories.PaymentRepository;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,8 @@ public class PaymentService {
 
     private final RazorpayClient razorpayClient;
 
+    private final PaymentEventPublisher paymentEventPublisher;
+
 //        now we create the order and then we directly used that in the
 
     public PaymentResponseDTO createPayment(PaymentRequestDTO paymentRequestDTO) throws Exception {
@@ -35,7 +39,7 @@ public class PaymentService {
 
 //        now here call the razorpayclient
         Order razorpayOrder = razorpayClient.orders.create(orderRequest);
-            System.out.println("razorpayorders object"+razorpayOrder);
+        System.out.println("razorpayorders object"+razorpayOrder);
 //        now build the payment response
         Payment payment = Payment.builder()
                 .orderId(paymentRequestDTO.getOrderId())
@@ -58,24 +62,25 @@ public class PaymentService {
 
     }
 
-//    done with create the order
-    public void markPaymentSuccess(String razorpayOrderId, String razorpayPaymentId) {
-    Payment payment = paymentRepository
-            .findByRazorpayOrderId(razorpayOrderId)
-            .orElseThrow();
+    //    done with create the order
+    public void markPaymentSuccess(String razorpayOrderId, String razorpayPaymentId, String userEmail) {
+        Payment payment = paymentRepository
+                .findByRazorpayOrderId(razorpayOrderId)
+                .orElseThrow();
 
-    payment.setRazorpayPaymentId(razorpayPaymentId);
-    payment.setPaymentStatus(PaymentStatus.SUCCESS);
+        payment.setRazorpayPaymentId(razorpayPaymentId);
+        payment.setPaymentStatus(PaymentStatus.SUCCESS);
 
-    paymentRepository.save(payment);
-}
+        paymentRepository.save(payment);
+        paymentEventPublisher.paymentSuccess(userEmail, payment.getOrderId());
+    }
 
-        public List<PaymentSummaryDTO> getPaymentsByCustomerId(Long customerId){
-            return paymentRepository.findByCustomerId(customerId)
-                    .stream()
-                    .map(this::toSummaryDTO)
-                    .toList();
-        }
+    public List<PaymentSummaryDTO> getPaymentsByCustomerId(Long customerId){
+        return paymentRepository.findByCustomerId(customerId)
+                .stream()
+                .map(this::toSummaryDTO)
+                .toList();
+    }
 
 
 

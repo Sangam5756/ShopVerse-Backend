@@ -1,6 +1,20 @@
+server:
+  port: 8084
+
 spring:
   application:
     name: order-service
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  security:
+    user:
+      name: disabled
+      password: disabled
 
   datasource:
     url: jdbc:mysql://localhost:3306/shopverse_order?createDatabaseIfNotExist=true
@@ -44,5 +58,8 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
+
+
+
 
 

@@ -5,6 +5,11 @@ spring:
   application:
     name: analytics-service
 
+  security:
+    user:
+      name: disabled
+      password: disabled
+
   kafka:
     bootstrap-servers: localhost:9092
 

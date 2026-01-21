@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
-public class UserServiceClient {
+public class  UserServiceClient {
 
     private final WebClient.Builder webClientBuilder;
     private static final String USER_SERVICE = "http://USER-SERVICE";

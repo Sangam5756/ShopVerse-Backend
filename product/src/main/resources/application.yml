@@ -1,6 +1,16 @@
+
+server:
+  port: 8083
+
 spring:
   application:
     name: product-service
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
   security:
     user:
@@ -16,6 +26,10 @@ spring:
 
   jpa:
     hibernate:
+      jdbc:
+        batch_size: 50
+      order_inserts: true
+      order_updates: true
       ddl-auto: update
     show-sql: true
     open-in-view: false

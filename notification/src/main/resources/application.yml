@@ -1,6 +1,14 @@
+server:
+  port: 8086
+
 spring:
   application:
     name: notification-service
+
+  security:
+    user:
+      name: disabled
+      password: disabled
 
   kafka:
     bootstrap-servers: localhost:9092

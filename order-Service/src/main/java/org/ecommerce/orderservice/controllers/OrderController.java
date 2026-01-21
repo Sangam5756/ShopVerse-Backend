@@ -7,6 +7,7 @@ import org.ecommerce.orderservice.dtos.OrderResponseDTO;
 import org.ecommerce.orderservice.dtos.OrderStatus;
 import org.ecommerce.orderservice.services.OrderServiceImpl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -18,10 +19,12 @@ public class OrderController {
     private  final OrderServiceImpl orderService;
 
     @PostMapping
-    public ResponseEntity<?> createOrder(@RequestBody OrderRequestDTO request){
-        OrderResponseDTO  orderResponseDTO = orderService.placeOrder(request);
-
-        return  ResponseEntity.ok(orderResponseDTO);
+    public ResponseEntity<?> createOrder(
+            @RequestBody OrderRequestDTO request,
+            Authentication auth
+    ) {
+        String userEmail = auth.getName();
+        return ResponseEntity.ok(orderService.placeOrder(request, userEmail));
     }
 
     @GetMapping("/order/{orderId}")
@@ -35,9 +38,15 @@ public class OrderController {
     }
 
     @PatchMapping("/{orderId}/status")
-    public ResponseEntity<?> updateOrderStatus(@PathVariable long orderId, @RequestParam OrderStatus orderStatus){
-         orderService.updateOrderStatus(orderId,orderStatus);
-        return ResponseEntity.ok("Order status updated successfully to "+orderStatus.name());
+    public ResponseEntity<?> updateOrderStatus(
+            @PathVariable long orderId,
+            @RequestParam OrderStatus orderStatus,
+            Authentication auth
+    ) {
+        String userEmail = auth.getName();
+        orderService.updateOrderStatus(orderId, orderStatus, userEmail);
+        return ResponseEntity.ok("Order status updated");
     }
+
 
 }

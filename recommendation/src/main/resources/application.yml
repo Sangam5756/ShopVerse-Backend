@@ -1,6 +1,14 @@
+server:
+  port: 8088
+
 spring:
   application:
     name: recommendation-service
+
+  security:
+    user:
+      name: disabled
+      password: disabled
 
   kafka:
     bootstrap-servers: localhost:9092

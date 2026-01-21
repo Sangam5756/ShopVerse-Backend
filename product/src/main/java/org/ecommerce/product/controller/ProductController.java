@@ -2,6 +2,8 @@ package org.ecommerce.product.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.ecommerce.product.dto.BulkProductRequest;
+import org.ecommerce.product.dto.BulkProductResponse;
 import org.ecommerce.product.dto.ProductRequest;
 import org.ecommerce.product.dto.ProductResponse;
 import org.ecommerce.product.service.ProductService;
@@ -12,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,8 +29,9 @@ public class ProductController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
-    public ProductResponse createProduct(@Valid @RequestBody ProductRequest request) {
-        return productService.createProduct(request);
+    public ProductResponse createProduct(@Valid @RequestBody ProductRequest request, Authentication auth) {
+        String userEmail = auth.getName();
+        return productService.createProduct(request, userEmail);
     }
 
     @GetMapping("/{id}")
@@ -64,16 +68,18 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable Long id,
-            @Valid @RequestBody ProductRequest request) {
-        
-        return ResponseEntity.ok(productService.updateProduct(id, request));
+            @Valid @RequestBody ProductRequest request,
+            Authentication auth) {
+        String userEmail = auth.getName();
+        return ResponseEntity.ok(productService.updateProduct(id, request, userEmail));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMIN')")
-    public void deleteProduct(@PathVariable Long id) {
-        productService.deleteProduct(id);
+    public void deleteProduct(@PathVariable Long id, Authentication auth) {
+        String userEmail = auth.getName();
+        productService.deleteProduct(id, userEmail);
     }
 
     @PatchMapping("/{id}/stock")
@@ -85,8 +91,19 @@ public class ProductController {
         return ResponseEntity.ok(productService.updateStock(id, quantity));
     }
 
+    @PostMapping("/bulk")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BulkProductResponse> bulkCreate(
+            @Valid @RequestBody List<BulkProductRequest> request,
+            Authentication auth
+    ) {
+        String userEmail = auth.getName();
+        return ResponseEntity.ok(productService.createBulkProducts(request, userEmail));
+    }
+
     @GetMapping("/count")
     public ResponseEntity<Long> countActiveProducts() {
         return ResponseEntity.ok(productService.countActiveProducts());
     }
 }
+

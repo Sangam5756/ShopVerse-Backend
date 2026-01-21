@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.ecommerce.orderservice.dtos.*;
 import org.ecommerce.orderservice.entities.Order;
 import org.ecommerce.orderservice.entities.OrderItem;
+import org.ecommerce.orderservice.producer.OrderEventPublisher;
 import org.ecommerce.orderservice.repositories.OrderItemRepository;
 import org.ecommerce.orderservice.repositories.OrderRepository;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,10 @@ public class OrderServiceImpl  {
         private final  OrderRepository  orderRepository;
         private final  OrderItemRepository orderItemRepository;
         private final ProductClient productClient;
+        private final OrderEventPublisher orderEventPublisher;
 
 
-        public OrderResponseDTO placeOrder(OrderRequestDTO orderRequestDTO) {
+        public OrderResponseDTO placeOrder(OrderRequestDTO orderRequestDTO, String userEmail) {
 //                generate orderId
             Long orderId = generateOrderId();
             Long orderItemId = generateOrderItemId();
@@ -55,11 +57,14 @@ public class OrderServiceImpl  {
 //create the new Order
             Order order = new Order(orderId, orderRequestDTO.getCustomerId(), LocalDateTime.now(),totalAmount, OrderStatus.PENDING);
 
+
 //            save the orders
             orderRepository.save(order);
 //            save all the orderitems
 
             orderItemRepository.saveAll(orderItems);
+
+            orderEventPublisher.orderPlaced(userEmail, totalAmount);
 
             return new OrderResponseDTO(order.getId(),order.getCustomerId(),order.getOrderDate(),order.getTotalAmount(),order.getStatus(),orderItems);
         }
@@ -89,12 +94,15 @@ public List<OrderResponseDTO> getOrdersByCustomerId(Long customerId) {
             return responseList;
         }
 
-public void updateOrderStatus(Long orderId,OrderStatus orderStatus) {
-            Order order  = orderRepository.findById(orderId)
-                    .orElseThrow(()->new RuntimeException("Order not found"));
-            order.setStatus(orderStatus);
-            orderRepository.save(order);
-            }
+    public void updateOrderStatus(Long orderId, OrderStatus orderStatus, String userEmail) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        order.setStatus(orderStatus);
+        orderRepository.save(order);
+        orderEventPublisher.orderStatusUpdated(userEmail, orderStatus.name());
+    }
+
 
 public Long generateOrderItemId(){
         return UUID.randomUUID().getLeastSignificantBits();

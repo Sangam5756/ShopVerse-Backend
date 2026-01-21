@@ -1,10 +1,11 @@
 package org.ecommerce.product.service;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.ecommerce.product.dto.ProductRequest;
-import org.ecommerce.product.dto.ProductResponse;
+import org.ecommerce.product.dto.*;
 import org.ecommerce.product.entity.Category;
 import org.ecommerce.product.entity.Product;
+import org.ecommerce.product.producer.ProductEventPublisher;
 import org.ecommerce.product.repository.CategoryRepository;
 import org.ecommerce.product.repository.ProductRepository;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductEventPublisher productEventPublisher;
 
     @Override
     @Transactional(readOnly = true)
@@ -36,7 +39,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponse createProduct(ProductRequest request) {
+    public ProductResponse createProduct(ProductRequest request, String userEmail) {
         // Check if SKU already exists
         if (request.getSku() != null && productRepository.existsBySku(request.getSku())) {
             throw new ResponseStatusException(CONFLICT, "SKU already exists");
@@ -59,6 +62,9 @@ public class ProductServiceImpl implements ProductService {
         product.setSku(generateSku(request)); // Implement this method if needed
 
         Product savedProduct = productRepository.save(product);
+
+        productEventPublisher.productCreated(userEmail, savedProduct.getName());
+
         return mapToResponse(savedProduct);
     }
 
@@ -86,7 +92,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponse updateProduct(Long id, ProductRequest request) {
+    public ProductResponse updateProduct(Long id, ProductRequest request, String userEmail) {
         Product product = productRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Product not found"));
 
@@ -106,15 +112,19 @@ public class ProductServiceImpl implements ProductService {
 
         product.setUpdatedAt(LocalDateTime.now());
         Product updatedProduct = productRepository.save(product);
+
+        productEventPublisher.productUpdated(userEmail, updatedProduct.getName());
         return mapToResponse(updatedProduct);
     }
 
     @Override
-    public void deleteProduct(Long id) {
+    public void deleteProduct(Long id, String userEmail) {
         Product product = productRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Product not found"));
         product.setActive(false);
+
         productRepository.save(product);
+        productEventPublisher.productDeleted(userEmail, product.getName());
     }
 
     @Override
@@ -153,6 +163,55 @@ public class ProductServiceImpl implements ProductService {
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public BulkProductResponse createBulkProducts(List<BulkProductRequest> requests, String userEmail) {
+
+        List<Product> products = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+
+        for (int i = 0; i < requests.size(); i++) {
+            BulkProductRequest req = requests.get(i);
+            try {
+                Category category = categoryRepository.findById(req.getCategoryId())
+                        .orElseThrow(() -> new RuntimeException("Category not found"));
+
+                Product product = new Product();
+                product.setName(req.getName());
+                product.setDescription(req.getDescription());
+                product.setPrice(req.getPrice());
+                product.setStockQuantity(req.getStockQuantity());
+                product.setBrand(req.getBrand());
+                product.setImageUrl(req.getImageUrl());
+                product.setCategory(category);
+                product.setSku(generateSku(req.getName(), req.getBrand(), category.getId()));
+                product.setActive(true);
+
+                products.add(product);
+
+            } catch (Exception e) {
+                errors.add("Row " + (i + 1) + ": " + e.getMessage());
+            }
+        }
+
+        productRepository.saveAll(products); // 🔥 batch insert
+        productEventPublisher.bulkProductCreated(userEmail, products.size());
+
+        return BulkProductResponse.builder()
+                .total(requests.size())
+                .success(products.size())
+                .failed(errors.size())
+                .errors(errors)
+                .build();
+    }
+
+    private String generateSku(String name, String brand, Long categoryId) {
+        return (brand + "-" + name + "-" + categoryId)
+                .toUpperCase()
+                .replaceAll("\\s+", "-")
+                .replaceAll("[^A-Z0-9-]", "");
     }
 
     private String generateSku(ProductRequest request) {

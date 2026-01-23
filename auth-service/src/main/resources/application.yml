@@ -1,7 +1,13 @@
+server:
+  port: 8081
 
 spring:
   application:
     name: auth-service
+
+  main:
+    lazy-initialization: true
+
   kafka:
     bootstrap-servers: localhost:9092
     producer:
@@ -42,6 +48,5 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
-server:
-  port: 8081
+
 

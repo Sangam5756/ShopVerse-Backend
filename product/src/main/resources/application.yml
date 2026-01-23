@@ -6,6 +6,9 @@ spring:
   application:
     name: product-service
 
+  main:
+    lazy-initialization: true
+
   kafka:
     bootstrap-servers: localhost:9092
     producer:

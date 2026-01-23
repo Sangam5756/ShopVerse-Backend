@@ -5,6 +5,9 @@ spring:
   application:
     name: order-service
 
+  main:
+    lazy-initialization: true
+
   kafka:
     bootstrap-servers: localhost:9092
     producer:

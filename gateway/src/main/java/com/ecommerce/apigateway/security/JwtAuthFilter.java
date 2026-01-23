@@ -26,7 +26,11 @@ public class JwtAuthFilter implements GlobalFilter {
 
         return method == HttpMethod.GET &&
                 (path.startsWith("/api/products")
-                        || path.startsWith("/api/categories"));
+                        || path.startsWith("/api/categories")
+                        || path.startsWith("/api/categories/")
+                        || path.startsWith("/api/orders")
+                        || path.startsWith("/api/orders/")
+                );
     }
 
     @Override

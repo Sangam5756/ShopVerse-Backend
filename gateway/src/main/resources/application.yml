@@ -38,6 +38,16 @@ spring:
               predicates:
                 - Path=/api/notifications/**
 
+            - id: order-service
+              uri: lb://order-service
+              predicates:
+                - Path=/api/orders/**
+
+            - id: payment-service
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/payments/**
+
           default-filters:
             PreserveHostHeader
           metrics:

@@ -13,7 +13,7 @@ public class OrderEventPublisher {
 
     private final KafkaTemplate<String, NotificationEvent> kafkaTemplate;
 
-    public void orderPlaced(String userEmail, double totalAmount) {
+    public void orderPlaced(String userEmail, double totalAmount, Long orderId) {
 
         NotificationEvent event = NotificationEvent.builder()
                 .userEmail(userEmail)
@@ -25,15 +25,15 @@ public class OrderEventPublisher {
         kafkaTemplate.send("notification-topic", userEmail, event);
     }
 
-    public void orderStatusUpdated(String userEmail, String status) {
+    public void orderStatusUpdated(String userEmail, String status, Long orderId) {
 
         NotificationEvent event = NotificationEvent.builder()
                 .userEmail(userEmail)
                 .eventType("ORDER_STATUS_UPDATED")
-                .message("Order status updated to " + status)
-                .timestamp(Instant.now())
+                .message("Order status updated to " + status).timestamp(Instant.now())
                 .build();
 
         kafkaTemplate.send("notification-topic", userEmail, event);
     }
 }
+

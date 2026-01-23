@@ -15,3 +15,4 @@ public class NotificationEvent  {
     private String message;
     private Instant timestamp;
 }
+

@@ -4,7 +4,7 @@ server:
 spring:
   application:
     name: recommendation-service
-
+  port : 8087
   security:
     user:
       name: disabled

@@ -18,9 +18,7 @@ public class PaymentEventPublisher {
         NotificationEvent event = NotificationEvent.builder()
                 .userEmail(userEmail)
                 .eventType("PAYMENT_SUCCESS")
-                .message("Payment successful for Order #" + orderId)
-                .timestamp(Instant.now())
-                .build();
+                .message("Payment successful for Order #" + orderId).timestamp(Instant.now()).build();
 
         kafkaTemplate.send("notification-topic", userEmail, event);
     }
@@ -30,10 +28,9 @@ public class PaymentEventPublisher {
         NotificationEvent event = NotificationEvent.builder()
                 .userEmail(userEmail)
                 .eventType("PAYMENT_FAILED")
-                .message("Payment failed for Order #" + orderId)
-                .timestamp(Instant.now())
-                .build();
+                .message("Payment failed for Order #" + orderId).timestamp(Instant.now()).build();
 
         kafkaTemplate.send("notification-topic", userEmail, event);
     }
 }
+

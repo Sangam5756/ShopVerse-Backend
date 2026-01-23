@@ -3,6 +3,9 @@ package org.ecommerce.paymentservice.services;
 
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
+import com.razorpay.Utils;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.AllArgsConstructor;
 import org.ecommerce.paymentservice.dtos.NotificationEvent;
 import org.ecommerce.paymentservice.dtos.PaymentRequestDTO;
@@ -19,7 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PaymentService {
 
 
@@ -28,6 +31,9 @@ public class PaymentService {
     private final RazorpayClient razorpayClient;
 
     private final PaymentEventPublisher paymentEventPublisher;
+
+    @Value("${razorpay.key.secret}")
+    private String razorpaySecret;
 
 //        now we create the order and then we directly used that in the
 
@@ -53,7 +59,6 @@ public class PaymentService {
 //        save the payment in the db
 
         paymentRepository.save(payment);
-//        reutrn response of the payment
         return PaymentResponseDTO.builder()
                 .razorpayOrderId(payment.getRazorpayOrderId())
                 .amount(payment.getAmount())
@@ -62,13 +67,21 @@ public class PaymentService {
 
     }
 
-    //    done with create the order
-    public void markPaymentSuccess(String razorpayOrderId, String razorpayPaymentId, String userEmail) {
-        Payment payment = paymentRepository
-                .findByRazorpayOrderId(razorpayOrderId)
-                .orElseThrow();
+        public void markPaymentSuccess(org.ecommerce.paymentservice.dtos.RazorpayCallbackDTO callback, String userEmail) throws Exception {
+        // Verify signature
+        JSONObject options = new JSONObject();
+        options.put("razorpay_order_id", callback.getRazorpayOrderId());
+        options.put("razorpay_payment_id", callback.getRazorpayPaymentId());
+        options.put("razorpay_signature", callback.getRazorpaySignature());
 
-        payment.setRazorpayPaymentId(razorpayPaymentId);
+        boolean isValid = Utils.verifyPaymentSignature(options, razorpaySecret);
+
+
+        Payment payment = paymentRepository
+                .findByRazorpayOrderId(callback.getRazorpayOrderId())
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        payment.setRazorpayPaymentId(callback.getRazorpayPaymentId());
         payment.setPaymentStatus(PaymentStatus.SUCCESS);
 
         paymentRepository.save(payment);
@@ -77,6 +90,13 @@ public class PaymentService {
 
     public List<PaymentSummaryDTO> getPaymentsByCustomerId(Long customerId){
         return paymentRepository.findByCustomerId(customerId)
+                .stream()
+                .map(this::toSummaryDTO)
+                .toList();
+    }
+
+    public List<PaymentSummaryDTO> getAllPaymentsForAdmin(){
+        return paymentRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
                 .map(this::toSummaryDTO)
                 .toList();
@@ -94,3 +114,7 @@ public class PaymentService {
                 .build();
     }
 }
+
+
+
+

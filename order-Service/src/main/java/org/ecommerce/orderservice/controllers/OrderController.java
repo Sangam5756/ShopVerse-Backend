@@ -7,6 +7,7 @@ import org.ecommerce.orderservice.dtos.OrderResponseDTO;
 import org.ecommerce.orderservice.dtos.OrderStatus;
 import org.ecommerce.orderservice.services.OrderServiceImpl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,16 +28,19 @@ public class OrderController {
         return ResponseEntity.ok(orderService.placeOrder(request, userEmail));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/order/{orderId}")
     public ResponseEntity<?> getOrderById(@PathVariable long orderId){
         return  ResponseEntity.ok(orderService.getOrderById(orderId));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<?> getOrdersByCustomerId(@PathVariable long customerId){
         return  ResponseEntity.ok(orderService.getOrdersByCustomerId(customerId));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{orderId}/status")
     public ResponseEntity<?> updateOrderStatus(
             @PathVariable long orderId,
@@ -46,6 +50,12 @@ public class OrderController {
         String userEmail = auth.getName();
         orderService.updateOrderStatus(orderId, orderStatus, userEmail);
         return ResponseEntity.ok("Order status updated");
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllOrdersForAdmin(){
+        return ResponseEntity.ok(orderService.getAllOrdersForAdmin());
     }
 
 

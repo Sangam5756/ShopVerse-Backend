@@ -15,7 +15,7 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://localhost:27017/notifications
+      uri: mongodb+srv://sangammunde3:69ZEogw3grwMXHyk@cluster0.7e0zod4.mongodb.net/notifications
 
 
   kafka:

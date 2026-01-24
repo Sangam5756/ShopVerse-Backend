@@ -39,7 +39,10 @@ public class AuthController {
                             user.getRole()
                     );
 
-                    authEventPublisher.userLoggedIn(user.getEmail());
+                    // ✅ SEND ROLE ALSO
+                    authEventPublisher.userLoggedIn(
+                            user.getEmail()
+                    );
 
                     return new AuthResponse(token, "Bearer");
                 })
@@ -50,6 +53,7 @@ public class AuthController {
                         ))
                 );
     }
+
 
     @PostMapping("/register")
     public Mono<UserResponse> register(@RequestBody UserRegistrationRequest request) {

@@ -36,4 +36,10 @@ public interface UserInteractionRepository
             "{ $project: { _id: 0, productId: '$_id' } }"
     })
     List<String> findPopularProductsAmongUsers(List<String> userEmails);
+
+    List<UserInteraction> findByUserEmailOrderByTimestampDesc(String userEmail);
+
+    List<String> findMostViewedProducts(int i);
+
+    List<String> findUsersWhoViewedProduct(String productId);
 }

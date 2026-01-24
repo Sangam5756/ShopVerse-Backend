@@ -12,6 +12,12 @@ spring:
 
   kafka:
     bootstrap-servers: localhost:9092
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: analytics-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
   datasource:
     driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
@@ -36,6 +42,12 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     enabled: true
+
+logging:
+  level:
+    com.ecommerce.analytics: DEBUG
+    org.apache.kafka: INFO
+    org.springframework.jdbc: DEBUG
 
 management:
   tracing:

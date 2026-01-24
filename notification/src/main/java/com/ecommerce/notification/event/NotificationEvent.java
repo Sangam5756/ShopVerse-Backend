@@ -1,20 +1,21 @@
-package com.ecommerce.notification.dto;
+package com.ecommerce.notification.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class NotificationEvent {
-    private String userEmail;
-    private String message;
     private String eventType;
-    private Instant timestamp;
+    private String userEmail;
+    private String role;
+    private String message;
+    private LocalDateTime timestamp;
 }
 

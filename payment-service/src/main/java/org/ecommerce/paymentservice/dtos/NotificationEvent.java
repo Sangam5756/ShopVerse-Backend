@@ -12,6 +12,7 @@ public class NotificationEvent {
 
     private String userEmail;
     private String eventType;   // ORDER_PLACED, PAYMENT_SUCCESS
+    private String role;
     private String message;
     private Instant timestamp;
 }

@@ -1,18 +1,20 @@
 package com.ecommerce.auth.dto;
 
 import lombok.*;
-
-import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class NotificationEvent {
+public class AnalyticsEvent {
+
     private String eventType;
+    private String service;
     private String userEmail;
-    private String role;
-    private String message;
+    private String entityId;
+    private Double amount;
     private LocalDateTime timestamp;
+    private Map<String, Object> metadata;
 }

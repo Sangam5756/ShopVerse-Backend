@@ -2,37 +2,45 @@ package com.ecommerce.auth.producer;
 
 import com.ecommerce.auth.dto.NotificationEvent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
 public class AuthEventPublisher {
 
-    private final KafkaTemplate<String, NotificationEvent> kafkaTemplate;
+    private final NotificationProducer notificationProducer;
+    private final AuthAnalyticsPublisher analyticsPublisher;
 
     public void userLoggedIn(String email) {
+
         NotificationEvent event = NotificationEvent.builder()
-                .userEmail(email)
                 .eventType("USER_LOGIN")
-                .message("User logged in successfully")
-                .timestamp(Instant.now())
+                .userEmail(email)
+                .role("CUSTOMER")
+                .timestamp(LocalDateTime.now())
                 .build();
 
-        kafkaTemplate.send("notification-topic", email, event);
+        notificationProducer.sendNotification(event);
+        
+        // Also publish analytics event
+        analyticsPublisher.userLoggedIn(email);
     }
 
     public void userRegistered(String email) {
+
         NotificationEvent event = NotificationEvent.builder()
-                .userEmail(email)
                 .eventType("USER_REGISTER")
+                .userEmail(email)
+                .role("CUSTOMER")
                 .message("Account created successfully")
-                .timestamp(Instant.now())
+                .timestamp(LocalDateTime.now())
                 .build();
 
-        kafkaTemplate.send("notification-topic", email, event);
+        notificationProducer.sendNotification(event);
+        
+        // Also publish analytics event
+        analyticsPublisher.userRegistered(email);
     }
 }
-

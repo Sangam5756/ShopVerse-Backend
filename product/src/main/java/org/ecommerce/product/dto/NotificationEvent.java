@@ -11,6 +11,7 @@ public class NotificationEvent {
 
     private String eventType;   // PRODUCT_CREATED, PRODUCT_UPDATED, PRODUCT_DELETED
     private String userEmail;
+    private String role;
     private String message;
     private Instant timestamp;
 }

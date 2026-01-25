@@ -5,20 +5,28 @@ spring:
   application:
     name: notification-service
 
+  main:
+    lazy-initialization: false
+
   security:
     user:
       name: disabled
       password: disabled
 
-  kafka:
-    bootstrap-servers: localhost:9092
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-
   data:
     mongodb:
       uri: mongodb+srv://sangammunde3:69ZEogw3grwMXHyk@cluster0.7e0zod4.mongodb.net/notifications
+
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+
 
 eureka:
   client:
@@ -35,7 +43,10 @@ springdoc:
 
 logging:
   level:
-    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.springframework.data.mongodb.core.MongoTemplate: INFO
+    org.apache.kafka: INFO
+    com.ecommerce.notification: INFO
+    root: INFO
 
 management:
   tracing:

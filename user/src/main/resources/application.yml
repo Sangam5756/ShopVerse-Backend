@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: user-service
+
+  main:
+    lazy-initialization: true
+
   security:
     user:
       name: disabled

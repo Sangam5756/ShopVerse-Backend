@@ -5,6 +5,9 @@ spring:
   application:
     name: gateway
 
+  main:
+    lazy-initialization: true
+
   cloud:
     gateway:
       httpclient:

@@ -10,11 +10,17 @@ spring:
   application:
     name: PAYMENT-SERVICE
 
+  main:
+    lazy-initialization: true
+
   kafka:
     bootstrap-servers: localhost:9092
     producer:
+      bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+      acks: all
+      retries: 3
 
 
   security:

@@ -11,4 +11,6 @@ public interface NotificationRepository extends MongoRepository<Notification, St
     // New methods for bulk updates
     List<Notification> findByReadFalse();
     List<Notification> findByUserEmailAndReadFalse(String userEmail);
+
+    List<Notification> findByRoleOrderByTimestampDesc(String admin);
 }

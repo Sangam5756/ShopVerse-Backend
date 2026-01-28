@@ -23,7 +23,7 @@ spring:
     driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
     url: jdbc:clickhouse://t8njuxf8ta.ap-south-1.aws.clickhouse.cloud:8443/default?ssl=true
     username: default
-    password: K7YRBBW~jIL_Z
+    password: z0xs_GDqfkBlb
     hikari:
       maximum-pool-size: 5
       minimum-idle: 1

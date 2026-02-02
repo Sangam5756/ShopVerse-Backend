@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -105,6 +107,65 @@ public class UserServiceImpl implements UserService {
                                 .toList()
                 )
                 .build();
+    }
+
+    @Override
+    public String createPasswordResetToken(String email) {
+        User user = getUser(email);
+        
+        String token = UUID.randomUUID().toString();
+        user.setResetToken(token);
+        user.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
+        userRepository.save(user);
+        
+        return token;
+    }
+
+    @Override
+    public boolean validateResetToken(String token) {
+        return userRepository.findByResetToken(token)
+                .map(user -> user.getResetTokenExpiry().isAfter(LocalDateTime.now()))
+                .orElse(false);
+    }
+
+    @Override
+    public UserResponse resetPassword(String token, String newPassword) {
+        User user = userRepository.findByResetToken(token)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Invalid or expired reset token"
+                ));
+
+        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Reset token has expired"
+            );
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        
+        return mapToResponse(userRepository.save(user));
+    }
+
+    @Override
+    public UserResponse findByResetToken(String token) {
+        User user = userRepository.findByResetToken(token)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Invalid reset token"
+                ));
+
+        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Reset token has expired"
+            );
+        }
+
+        return mapToResponse(user);
     }
 
 }

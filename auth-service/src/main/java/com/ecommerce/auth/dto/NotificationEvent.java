@@ -15,4 +15,5 @@ public class NotificationEvent {
     private String role;
     private String message;
     private LocalDateTime timestamp;
+    private String resetToken;
 }

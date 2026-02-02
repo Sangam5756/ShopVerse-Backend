@@ -11,7 +11,7 @@ spring:
     name: PAYMENT-SERVICE
 
   main:
-    lazy-initialization: true
+    lazy-initialization: false
 
   kafka:
     bootstrap-servers: localhost:9092

@@ -43,4 +43,18 @@ public class AuthEventPublisher {
         // Also publish analytics event
         analyticsPublisher.userRegistered(email);
     }
+
+    public void passwordResetRequested(String email, String resetToken) {
+
+        NotificationEvent event = NotificationEvent.builder()
+                .eventType("PASSWORD_RESET")
+                .userEmail(email)
+                .role("CUSTOMER")
+                .message("Password reset requested")
+                .timestamp(LocalDateTime.now())
+                .resetToken(resetToken)
+                .build();
+
+        notificationProducer.sendNotification(event);
+    }
 }

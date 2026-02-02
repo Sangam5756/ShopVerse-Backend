@@ -5,7 +5,7 @@ spring:
   application:
     name: discovery-service
   main:
-    lazy-initialization: true
+    lazy-initialization: false
 
 eureka:
   instance:

@@ -104,7 +104,6 @@ services:
       - microservices_network
     restart: unless-stopped
 
-
   # ================= PROMETHEUS =================
   prometheus:
     image: prom/prometheus

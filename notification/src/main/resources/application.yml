@@ -1,6 +1,7 @@
 server:
   port: 8086
 
+productionUrl: http://localhost:5173
 spring:
   application:
     name: notification-service
@@ -25,8 +26,17 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-
-
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: sangammunde3@gmail.com
+    password: zfej bcmc bxow wseq
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 eureka:
   client:
@@ -47,6 +57,8 @@ logging:
     org.apache.kafka: INFO
     com.ecommerce.notification: INFO
     root: INFO
+
+
 
 management:
   tracing:

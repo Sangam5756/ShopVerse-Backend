@@ -26,21 +26,31 @@ public class AnalyticsEventConsumer {
     @KafkaListener(topics = "analytics-topic", groupId = "analytics-group")
     public void consumeAnalyticsEvent(ConsumerRecord<String, String> record) {
         try {
-            log.info("RAW ANALYTICS EVENT RECEIVED: key={}, value={}", record.key(), record.value());
+            log.info("🔥 ANALYTICS EVENT RECEIVED: topic={}, partition={}, offset={}, key={}", 
+                    record.topic(), record.partition(), record.offset(), record.key());
+            log.info("📦 RAW ANALYTICS EVENT VALUE: {}", record.value());
+            
+            if (record.value() == null || record.value().trim().isEmpty()) {
+                log.warn("⚠️ Received empty analytics event");
+                return;
+            }
             
             // Parse the analytics event directly (no conversion needed)
             AnalyticsEvent analyticsEvent = objectMapper.readValue(record.value(), AnalyticsEvent.class);
+            log.info("🗺️ PARSED ANALYTICS EVENT: {}", analyticsEvent);
             
             // Save to ClickHouse
             analyticsEventService.saveAnalyticsEvent(analyticsEvent);
             
-            log.info("ANALYTICS EVENT SAVED: eventType={}, service={}, userEmail={}", 
+            log.info("✅ ANALYTICS EVENT SAVED: eventType={}, service={}, userEmail={}", 
                     analyticsEvent.getEventType(), 
                     analyticsEvent.getService(), 
                     analyticsEvent.getUserEmail());
                     
         } catch (Exception e) {
-            log.error("Failed to process analytics event", e);
+            log.error("❌ Failed to process analytics event: {}", e.getMessage());
+            log.error("❌ Raw record: key={}, value={}", record.key(), record.value());
+            e.printStackTrace();
         }
     }
 
@@ -48,24 +58,35 @@ public class AnalyticsEventConsumer {
     @KafkaListener(topics = "notification-topic", groupId = "analytics-group")
     public void consumeNotificationEvent(ConsumerRecord<String, String> record) {
         try {
-            log.info("RAW NOTIFICATION EVENT RECEIVED: key={}, value={}", record.key(), record.value());
+            log.info("🔥 NOTIFICATION EVENT RECEIVED: topic={}, partition={}, offset={}, key={}", 
+                    record.topic(), record.partition(), record.offset(), record.key());
+            log.info("📦 RAW NOTIFICATION EVENT VALUE: {}", record.value());
+            
+            if (record.value() == null || record.value().trim().isEmpty()) {
+                log.warn("⚠️ Received empty notification event");
+                return;
+            }
             
             // Parse the notification event
             Map<String, Object> notificationEvent = objectMapper.readValue(record.value(), Map.class);
+            log.info("🗺️ PARSED NOTIFICATION EVENT: {}", notificationEvent);
             
             // Convert to AnalyticsEvent
             AnalyticsEvent analyticsEvent = convertToAnalyticsEvent(notificationEvent);
+            log.info("🔄 CONVERTED TO ANALYTICS EVENT: {}", analyticsEvent);
             
             // Save to ClickHouse
             analyticsEventService.saveAnalyticsEvent(analyticsEvent);
             
-            log.info("NOTIFICATION EVENT CONVERTED AND SAVED: eventType={}, service={}, userEmail={}", 
+            log.info("✅ NOTIFICATION EVENT CONVERTED AND SAVED: eventType={}, service={}, userEmail={}", 
                     analyticsEvent.getEventType(), 
                     analyticsEvent.getService(), 
                     analyticsEvent.getUserEmail());
                     
         } catch (Exception e) {
-            log.error("Failed to process notification event", e);
+            log.error("❌ Failed to process notification event: {}", e.getMessage());
+            log.error("❌ Raw record: key={}, value={}", record.key(), record.value());
+            e.printStackTrace();
         }
     }
 

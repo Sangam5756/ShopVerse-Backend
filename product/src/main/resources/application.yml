@@ -7,7 +7,7 @@ spring:
     name: product-service
 
   main:
-    lazy-initialization: true
+    lazy-initialization: false
 
   kafka:
     bootstrap-servers: localhost:9092

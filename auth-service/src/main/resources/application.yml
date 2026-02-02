@@ -6,7 +6,7 @@ spring:
     name: auth-service
 
   main:
-    lazy-initialization: true
+    lazy-initialization: false
     web-application-type: reactive
 
 

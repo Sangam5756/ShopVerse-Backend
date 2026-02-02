@@ -6,7 +6,7 @@ spring:
     name: user-service
 
   main:
-    lazy-initialization: true
+    lazy-initialization: false
 
   security:
     user:

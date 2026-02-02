@@ -33,5 +33,25 @@ public class  UserServiceClient {
                 .retrieve()
                 .bodyToMono(UserResponse.class);
     }
+
+    public Mono<String> createPasswordResetToken(String email) {
+        return webClientBuilder.build()
+                .post()
+                .uri(USER_SERVICE + "/api/internal/users/password-reset-token")
+                .bodyValue(email)
+                .retrieve()
+                .bodyToMono(String.class);
+    }
+
+    public Mono<UserResponse> resetPassword(String token, String newPassword) {
+        return webClientBuilder.build()
+                .post()
+                .uri(USER_SERVICE + "/api/internal/users/reset-password")
+                .bodyValue(new PasswordResetRequest(token, newPassword))
+                .retrieve()
+                .bodyToMono(UserResponse.class);
+    }
+
+    private record PasswordResetRequest(String token, String newPassword) {}
 }
 

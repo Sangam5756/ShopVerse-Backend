@@ -37,4 +37,16 @@ public class UserInternalController {
 
         return dto;
     }
+
+    @PostMapping("/password-reset-token")
+    public String createPasswordResetToken(@RequestBody String email) {
+        return userService.createPasswordResetToken(email);
+    }
+
+    @PostMapping("/reset-password")
+    public UserResponse resetPassword(@RequestBody PasswordResetRequest request) {
+        return userService.resetPassword(request.token(), request.newPassword());
+    }
+
+    private record PasswordResetRequest(String token, String newPassword) {}
 }

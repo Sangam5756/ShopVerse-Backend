@@ -3,6 +3,9 @@ package com.ecommerce.auth.controller;
 import com.ecommerce.auth.client.UserServiceClient;
 import com.ecommerce.auth.dto.AuthRequest;
 import com.ecommerce.auth.dto.AuthResponse;
+import com.ecommerce.auth.dto.ForgotPasswordRequest;
+import com.ecommerce.auth.dto.PasswordResetResponse;
+import com.ecommerce.auth.dto.ResetPasswordRequest;
 import com.ecommerce.auth.dto.UserRegistrationRequest;
 import com.ecommerce.auth.dto.UserResponse;
 import com.ecommerce.auth.producer.AuthEventPublisher;
@@ -13,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
@@ -62,5 +66,30 @@ public class AuthController {
                 .doOnNext(user ->
                         authEventPublisher.userRegistered(user.getEmail())
                 );
+    }
+
+    @PostMapping("/forgot-password")
+    @ResponseStatus(HttpStatus.OK)
+    public Mono<PasswordResetResponse> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        return userServiceClient.createPasswordResetToken(request.getEmail())
+                .map(token -> {
+                    // Publish password reset event to send email notification
+                    authEventPublisher.passwordResetRequested(request.getEmail(), token);
+                    return new PasswordResetResponse("Password reset link sent to your email", true);
+                })
+                .onErrorResume(e -> {
+                    // Always return success to prevent email enumeration attacks
+                    return Mono.just(new PasswordResetResponse("If your email exists, a reset link has been sent", true));
+                });
+    }
+
+    @PostMapping("/reset-password")
+    public Mono<PasswordResetResponse> resetPassword(@RequestBody ResetPasswordRequest request) {
+        return userServiceClient.resetPassword(request.getToken(), request.getNewPassword())
+                .map(user -> new PasswordResetResponse("Password reset successfully", true))
+                .onErrorResume(e -> Mono.error(new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        e.getMessage()
+                )));
     }
 }

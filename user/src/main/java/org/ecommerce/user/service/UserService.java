@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface UserService {
 
-
     UserResponse getUserByEmail(String email);
 
     UserResponse createUser(UserCreateRequest request);
@@ -17,4 +16,13 @@ public interface UserService {
     UserResponse deleteUser(String email);
 
     List<UserResponse> getAllUsers();
+
+    // Password reset methods
+    String createPasswordResetToken(String email);
+
+    boolean validateResetToken(String token);
+
+    UserResponse resetPassword(String token, String newPassword);
+
+    UserResponse findByResetToken(String token);
 }

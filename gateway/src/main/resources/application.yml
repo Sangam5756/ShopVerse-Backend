@@ -6,7 +6,7 @@ spring:
     name: gateway
 
   main:
-    lazy-initialization: true
+    lazy-initialization: false
 
   cloud:
     gateway:

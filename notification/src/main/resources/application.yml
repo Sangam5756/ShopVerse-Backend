@@ -16,7 +16,7 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb+srv://sangammunde3:69ZEogw3grwMXHyk@cluster0.7e0zod4.mongodb.net/notifications
+      uri:
 
 
   kafka:
@@ -30,7 +30,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: sangammunde3@gmail.com
-    password: zfej bcmc bxow wseq
+    password: 
     properties:
       mail:
         smtp:
